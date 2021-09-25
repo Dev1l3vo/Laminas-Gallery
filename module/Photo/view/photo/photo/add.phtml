@@ -1,0 +1,17 @@
+<?php
+// module/Album/view/album/album/add.phtml:
+
+$title = 'Add new photo';
+$this->headTitle($title);
+?>
+<h1><?= $this->escapeHtml($title) ?></h1>
+<?php
+$form->setAttribute('action', $this->url('photo', ['action' => 'add']));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+echo $this->formCollection($form);
+echo $this->form()->closeTag();
+?>
+
+<a href="<?=$this->url('photo',['action'=>'index']);?>" class="bg-blue-200 rounded">Back</a>

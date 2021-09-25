@@ -1,0 +1,72 @@
+<?php
+// module/Album/view/album/album/index.phtml:
+    $title = 'Gallery';
+    $this->headTitle($title);
+?>
+<style>
+    img.text-center{
+        max-height:500px;
+        max-width:500px;
+        height:auto;
+        width:auto;
+    }
+</style>
+
+
+<div class="m-5">
+    <div class="justify-center">
+        <p class="text-2xl" id="imgName"><?= $picture->name ?></p>
+        <a href="<?=$this->url('photo',['action'=>'add']);?>" class="fas fa-plus-circle"></a>
+        <a href="<?=$this->url('photo',['action'=>'delete','id'=>$picture->id]);?>" id="deleteImg" class="fas fa-trash"></a>
+    </div>
+    <p class="hidden" id="error"></p>
+    <?php if($picture->encode_photo):?> 
+        <center><img class="border border-red-400" id="img" src="data:image/png;base64,<?= $picture->encode_photo?>"/></center> 
+    <?php else:?>
+        <p>Gallery is empty</p>
+    <?php endif; ?>
+    
+</div>
+
+<div>
+    <a href="<?=$this->url('photo',['action'=>'prev', 'id'=> $picture->id-1]);?>" class="bg-blue-200 rounded" id="prevImg">Previous Image</a>
+    <a href="<?=$this->url('photo',['action'=>'next', 'id'=> $picture->id+1]);?>" class="bg-blue-200 rounded" id="nextImg">Next Image</a>
+</div>
+
+<script>
+    img = document.getElementById('img');
+    nextBtn = document.getElementById('nextImg');
+    prevBtn = document.getElementById('prevImg');
+    imgName = document.getElementById('imgName');
+    deleteTag = document.getElementById('deleteImg');
+    ajaxReq = new XMLHttpRequest();
+    errorObj = document.getElementById('error');
+
+    function BtnHandler(event){
+        event.preventDefault();
+        ajaxReq.open('GET',event.target.href);
+        ajaxReq.onreadystatechange = function() {//Call a function when the state changes.
+            if(ajaxReq.readyState == 4 && ajaxReq.status == 200) {
+                jsonResp = JSON.parse(ajaxReq.responseText);
+                if(jsonResp.error){
+                    errorObj.classList.add('bg-red-400');
+                    errorObj.classList.remove('hidden');
+                    errorObj.innerText = jsonResp.error;
+                }else{
+                    img.src = "data:image/png;base64,"+jsonResp.encode_photo;
+                    imgName.innerText = jsonResp.name;
+                    nextBtn.href = '/photo/next/'+ (parseInt(jsonResp.id)+1);
+                    prevBtn.href = '/photo/prev/'+ (parseInt(jsonResp.id)-1 < 0 ? 0 : parseInt(jsonResp.id)-1);
+                    deleteTag.href = '/photo/delete/'+ (parseInt(jsonResp.id));
+                    errorObj.classList.add('hidden');
+                }
+               
+            }
+        }
+        ajaxReq.send(); 
+    }
+
+    nextBtn.addEventListener('click',BtnHandler);
+    prevBtn.addEventListener('click',BtnHandler);
+    
+</script>
